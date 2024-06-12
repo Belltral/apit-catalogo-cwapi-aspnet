@@ -1,0 +1,17 @@
+﻿using APICatalogo.Models;
+using AutoMapper;
+
+namespace APICatalogo.DTOs.Mappings;
+/// <summary>
+/// Mapeamento com AutoMapper
+/// </summary>
+public class ProdutoDTOMappingProfile : Profile
+{
+    public ProdutoDTOMappingProfile()
+    {
+        CreateMap<Produto, ProdutoDTO>().ReverseMap();
+        CreateMap<Categoria, CategoriaDTO>().ReverseMap();
+        CreateMap<Produto, ProdutoDTOUpdateRequest>().ReverseMap();
+        CreateMap<Produto, ProdutoDTOUpdateResponse>().ReverseMap();
+    }
+}
