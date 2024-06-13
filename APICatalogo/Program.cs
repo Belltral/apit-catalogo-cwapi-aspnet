@@ -48,6 +48,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
+    options.IncludeErrorDetails = true;
     options.SaveToken = true;
     options.RequireHttpsMetadata = false; // true para produção
     options.TokenValidationParameters = new TokenValidationParameters()
@@ -62,6 +63,16 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
 });
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"))
+    .AddPolicy("SuperAdminOnly", policy => policy.RequireRole("SuperAdmin").RequireClaim("id", "Teste"))
+    .AddPolicy("UserOnly", policy => policy.RequireRole("User"))
+    .AddPolicy("ExclusivePolicyOnly", 
+        policy => policy.RequireAssertion(context => 
+                                        context.User.HasClaim(claim =>
+                                            claim.Type == "id" && claim.Value == "Teste"
+                                            || context.User.IsInRole("SuperAdmin"))));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

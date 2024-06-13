@@ -14,7 +14,7 @@ namespace APICatalogo.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriasController : Controller
+    public class CategoriasController : ControllerBase
     {
         //private readonly IRepository<Categoria> _repository;
         private readonly IUnitOfWork _uof;

@@ -30,6 +30,7 @@ public class TokenService : ITokenService
             Expires = DateTime.UtcNow.AddMinutes(_config.GetSection("JWT").GetValue<double>("TokenValidityInMinutes")),
             Audience = _config.GetSection("JWT").GetValue<string>("ValidAudience"),
             Issuer = _config.GetSection("JWT").GetValue<string>("ValidIssuer"),
+            SigningCredentials = signingCredentials
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
