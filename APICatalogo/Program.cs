@@ -42,6 +42,7 @@ string? sqlServerConnection = builder.Configuration.GetConnectionString("Default
 builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseSqlServer(sqlServerConnection));
 
+// Adiciona os serviços de autenticação
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -64,6 +65,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Adiciona os serviços de políticas e regras de autorização
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"))
     .AddPolicy("SuperAdminOnly", policy => policy.RequireRole("SuperAdmin").RequireClaim("id", "Teste"))

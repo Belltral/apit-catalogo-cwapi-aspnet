@@ -144,6 +144,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "AdminOnly")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         public async Task<ActionResult<CategoriaDTO>> Delete(int id)
         {
