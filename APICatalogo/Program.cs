@@ -30,6 +30,15 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions
             .ReferenceHandler = ReferenceHandler.IgnoreCycles).AddNewtonsoftJson();
 
+//Política CORS
+builder.Services.AddCors(options =>
+    options.AddPolicy("OrigensComAcessoPermitido", policy =>
+    {
+        policy.WithOrigins("https://localhost:7022", "https://www.apirequest.io")
+              .WithMethods("GET", "POST")
+              .AllowAnyHeader();
+    }));
+
 var secretKey = builder.Configuration["JWT:SecretKey"]
     ?? throw new ArgumentException("Invalid secret key!");
 
@@ -135,6 +144,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
+
+app.UseCors();
+
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
