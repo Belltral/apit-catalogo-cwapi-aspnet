@@ -26,7 +26,7 @@ public class CustomerLogger : ILogger
     {
         string mensagem = $"{logLevel.ToString()}: {eventId.Id} - {formatter(state, exception)}";
 
-        EscreverTextoNoArquivo(mensagem);
+        //EscreverTextoNoArquivo(mensagem);
     }
 
     private void EscreverTextoNoArquivo(string mensagem)
