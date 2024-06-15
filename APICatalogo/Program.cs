@@ -4,16 +4,19 @@ using APICatalogo.Extensions;
 using APICatalogo.Filters;
 using APICatalogo.Logging;
 using APICatalogo.Models;
+using APICatalogo.ReateLimitOptions;
 using APICatalogo.Repositories;
 using APICatalogo.Repositories.Interfaces;
 using APICatalogo.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -119,6 +122,39 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddScoped<ApiLoggingFilter>();
 
+var myOptions = new MyRateLimitOptions();
+builder.Configuration.GetSection(MyRateLimitOptions.MyRateLimit).Bind(myOptions);
+// Adiciona o Rate Limiting
+builder.Services.AddRateLimiter(rateLimiterOptions =>
+{
+    rateLimiterOptions.AddFixedWindowLimiter("Fixed", options =>
+    {
+        options.PermitLimit = myOptions.PermitLimit; //1;
+        options.Window = TimeSpan.FromSeconds(myOptions.Window);//5
+        options.QueueLimit = myOptions.QueueLimit; //0;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+    rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
+// Adiciona o Rate Limiting de forma global
+builder.Services.AddRateLimiter(rateLimiterOptions =>
+{
+    rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    rateLimiterOptions.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpcontext =>
+                                        RateLimitPartition.GetFixedWindowLimiter(
+                                                            partitionKey: httpcontext.User.Identity?.Name ??
+                                                                          httpcontext.Request.Headers.Host.ToString(),
+                                        factory: partition => new FixedWindowRateLimiterOptions
+                                        {
+                                            AutoReplenishment = true,
+                                            PermitLimit = 2,
+                                            QueueLimit = 0,
+                                            Window = TimeSpan.FromSeconds(10)
+                                        }));
+});
+
 // Adiciona os serviços para injeção de dependência
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
@@ -146,6 +182,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseCors();
+
+app.UseRateLimiter();
 
 app.UseAuthorization();
 app.MapControllers();

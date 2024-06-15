@@ -7,12 +7,14 @@ using APICatalogo.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using X.PagedList;
 
 namespace APICatalogo.Controllers
 {
+    [EnableRateLimiting("Fixed")]
     [EnableCors("OrigensComAcessoPermitido")]
     [Route("api/[controller]")]
     [ApiController]
@@ -55,6 +57,7 @@ namespace APICatalogo.Controllers
 
         [HttpGet]
         //[Authorize]
+        [DisableRateLimiting]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get()
         {
