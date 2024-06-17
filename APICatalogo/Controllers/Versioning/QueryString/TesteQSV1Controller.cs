@@ -6,6 +6,7 @@ namespace APICatalogo.Controllers.Versioning.QueryString;
 [Route("api/teste")]
 [ApiController]
 [ApiVersion("1.0", Deprecated = true)]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class TesteQSV1Controller : ControllerBase
 {
     [HttpGet]

@@ -6,6 +6,7 @@ namespace APICatalogo.Controllers.Versioning.URL;
 [Route("api/v{version:apiVersion}/teste")]
 [ApiController]
 [ApiVersion("1.0", Deprecated = true)]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class TesteURLV1Controller : ControllerBase
 {
     [HttpGet]

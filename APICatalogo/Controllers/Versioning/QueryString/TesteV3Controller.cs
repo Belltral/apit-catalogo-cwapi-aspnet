@@ -8,6 +8,7 @@ namespace APICatalogo.Controllers.Versioning.QueryString
     [ApiController]
     [ApiVersion(3)]
     [ApiVersion(4)]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class TesteV3Controller : ControllerBase
     {
         [HttpGet]
