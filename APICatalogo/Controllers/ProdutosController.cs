@@ -14,6 +14,7 @@ namespace APICatalogo.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ApiConventionType(typeof(DefaultApiConventions))] // Aplica a convenção de resposta em todos os métodos action do controlador
     public class ProdutosController : ControllerBase
     {
         //private readonly IProdutoRepository _produtoRepository;
@@ -82,7 +83,11 @@ namespace APICatalogo.Controllers
             return ObterProdutos(produtos);
         }
 
-        [Authorize(Policy = "UserOnly")]
+        /// <summary>
+        /// Exibe uma relação dos produtos
+        /// </summary>
+        /// <returns>Uma lista de objetos Produto</returns>
+        //[Authorize(Policy = "UserOnly")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get()
         {
@@ -96,6 +101,11 @@ namespace APICatalogo.Controllers
 
         }
 
+        /// <summary>
+        /// Obtém um produto pelo seu ID
+        /// </summary>
+        /// <param name="id">ID do produto a ser localizado</param>
+        /// <returns>Um objeto Produto</returns>
         [HttpGet("{id:int}", Name = "ObterProduto")]
         public async Task<ActionResult<ProdutoDTO>> Get(int id)
         {

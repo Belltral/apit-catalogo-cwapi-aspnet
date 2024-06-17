@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using X.PagedList;
+using Microsoft.AspNetCore.Http;
 
 namespace APICatalogo.Controllers
 {
@@ -18,6 +19,7 @@ namespace APICatalogo.Controllers
     [EnableCors("OrigensComAcessoPermitido")]
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")] // Informa o tipo de retorno que os endpoints vão retornar
     public class CategoriasController : ControllerBase
     {
         //private readonly IRepository<Categoria> _repository;
@@ -55,10 +57,16 @@ namespace APICatalogo.Controllers
             return Ok(categoriasDto);
         }
 
+        /// <summary>
+        /// Obtem uma lista de objetos Categoria
+        /// </summary>
+        /// <returns>Uma lista de objetos Categoria</returns>
         [HttpGet]
         //[Authorize]
         [DisableRateLimiting]
         [ServiceFilter(typeof(ApiLoggingFilter))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get()
         {
             _logger.LogInformation("====== GET api/categorias ======");
@@ -89,6 +97,11 @@ namespace APICatalogo.Controllers
             return ObterCategorias(categoriasFiltradas);
         }
 
+        /// <summary>
+        /// Obtem uma categoria pelo ID
+        /// </summary>
+        /// <param name="id">ID da categoria a ser localizada</param>
+        /// <returns>Objeto Categoria</returns>
         [DisableCors]
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
@@ -103,8 +116,24 @@ namespace APICatalogo.Controllers
             return Ok(categoriaDto);
         }
 
+        /// <summary>
+        /// Inclui uma nova categoria
+        /// </summary>
+        /// <remarks>
+        /// Exemplo de request:
+        ///     POST api/categorias
+        ///     {
+        ///         "categoriaId": 1,
+        ///         "nome": "categoria1",
+        ///         "imagemUrl": "http://teste.net/1.jpg"
+        ///     }
+        /// </remarks>
+        /// <param name="categoriaDto">Objeto Categoria a ser incluído</param>
+        /// <returns>O objeto Categoria incluído</returns>
         [HttpPost]
         [ServiceFilter(typeof(ApiLoggingFilter))]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<CategoriaDTO>> Post(CategoriaDTO categoriaDto)
         {
             _logger.LogInformation($"====== POST api/categorias ======");
@@ -128,6 +157,9 @@ namespace APICatalogo.Controllers
 
         [HttpPut("{id:int}")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<CategoriaDTO>> Put(int id, CategoriaDTO categoriaDto)
         {
             _logger.LogInformation($"====== PUT api/categorias/id ======");
@@ -152,6 +184,9 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int}")]
         [Authorize(Policy = "AdminOnly")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<CategoriaDTO>> Delete(int id)
         {
             _logger.LogInformation($"====== DELETE api/categorias/id ======");
