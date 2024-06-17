@@ -8,6 +8,7 @@ using APICatalogo.ReateLimitOptions;
 using APICatalogo.Repositories;
 using APICatalogo.Repositories.Interfaces;
 using APICatalogo.Services;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
@@ -155,6 +156,22 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
                                         }));
 });
 
+// Adiciona o versionamento da API
+builder.Services.AddApiVersioning(o =>
+{
+    o.DefaultApiVersion = new ApiVersion(1, 0); // Define a versão padrão da API
+    o.AssumeDefaultVersionWhenUnspecified = true; // Especifica que a versão padrão será utilizada caso nenhuma versão for especificada na requisição
+    o.ReportApiVersions = true; // Indica que as versões da API devem ser incluídas no header do response
+
+    o.ApiVersionReader = ApiVersionReader.Combine(
+        new QueryStringApiVersionReader(), // Adiciona o suporte ao versionamento por QueryString
+        new UrlSegmentApiVersionReader()); // Adiciona o suporte ao versionamento por URL
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
+    
 // Adiciona os serviços para injeção de dependência
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
