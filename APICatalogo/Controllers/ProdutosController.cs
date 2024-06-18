@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using X.PagedList;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace APICatalogo.Controllers
 {
@@ -89,16 +91,26 @@ namespace APICatalogo.Controllers
         /// <returns>Uma lista de objetos Produto</returns>
         //[Authorize(Policy = "UserOnly")]
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get()
         {
-            var produtos = await _uof.ProdutoRepository.GetAllAsync();
-            if (produtos is null)
-                return NotFound("Produtos não encontrados");
+            try
+            {
+                var produtos = await _uof.ProdutoRepository.GetAllAsync();
+                if (produtos is null)
+                    return NotFound("Produtos não encontrados");
 
-            var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
+                var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
 
-            return Ok(produtosDto);
-
+                return Ok(produtosDto);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         /// <summary>
@@ -109,6 +121,11 @@ namespace APICatalogo.Controllers
         [HttpGet("{id:int}", Name = "ObterProduto")]
         public async Task<ActionResult<ProdutoDTO>> Get(int id)
         {
+            if (id == null || id <= 0)
+            {
+                return BadRequest("Id de produto inválido");
+            }
+
             var produto = await _uof.ProdutoRepository.GetAsync(p => p.ProdutoId == id);
             if (produto is null)
                 return NotFound("Produto não encontrado");
@@ -162,6 +179,9 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ProdutoDTO>> Put(int id, ProdutoDTO produtoDto)
         {
             if (id != produtoDto.ProdutoId)
